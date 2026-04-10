@@ -3,7 +3,7 @@ import { hotkeysCoreFeature, syncDataLoaderFeature } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
 import { Button } from "@/components/ui/button";
 import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
-import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
+import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon, BookOpen } from "lucide-react";
 import Logo from "@/components/Logo";
 import StarRating from "@/components/StarRating";
 
@@ -63,7 +63,7 @@ const existingItems: Record<string, Item> = {
   "phys-exam": { name: "Midterm Review.pdf", rating: 3 },
 };
 
-const indent = 20;
+const indent = 24;
 
 const ExistingFolder = () => {
   const navigate = useNavigate();
@@ -85,55 +85,86 @@ const ExistingFolder = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="border-b border-border">
-        <div className="container mx-auto flex items-center justify-between h-16 px-4">
+      {/* Header */}
+      <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-10">
+        <div className="container mx-auto flex items-center justify-between h-14 px-6">
           <div className="flex items-center gap-3">
-            <Logo className="w-8 h-8 text-foreground" />
-            <span className="text-lg font-semibold text-foreground">BridgeAI</span>
+            <Logo className="w-7 h-7 text-foreground" />
+            <span className="text-base font-semibold text-foreground tracking-tight">BridgeAI</span>
           </div>
           <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground gap-2"
             onClick={() => navigate("/dashboard")}
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-2xl font-semibold text-foreground mb-6">Existing Folders</h1>
+      {/* Main */}
+      <main className="flex-1 container mx-auto px-6 py-10 max-w-3xl">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 rounded-lg bg-accent/50">
+            <BookOpen className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold text-foreground tracking-tight">My Courses</h1>
+            <p className="text-sm text-muted-foreground">Browse your existing course materials and ratings</p>
+          </div>
+        </div>
 
-        <div className="glass-card rounded-2xl p-4">
-          <Tree tree={tree} className="w-full">
-            {tree.getItems().map((item) => (
-              <TreeItem key={item.getId()} item={item}>
-                <div className="flex items-center justify-between w-full">
-                  <TreeItemLabel item={item} className="flex items-center gap-2">
-                    {item.isFolder() ? (
-                      item.isExpanded() ? (
-                        <FolderOpenIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+        <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden">
+          <Tree tree={tree} className="w-full py-1">
+            {tree.getItems().map((item) => {
+              const level = item.getItemMeta().level;
+              const isFolder = item.isFolder();
+              const isTopLevel = level === 0;
+
+              return (
+                <TreeItem
+                  key={item.getId()}
+                  item={item}
+                  className={`
+                    group rounded-none border-b border-border/20 last:border-b-0
+                    hover:bg-accent/30 transition-colors
+                    ${isTopLevel && isFolder ? "bg-accent/10" : ""}
+                    ${isFolder ? "py-2" : "py-1.5"}
+                  `}
+                >
+                  <div className="flex items-center justify-between w-full pr-2">
+                    <TreeItemLabel item={item} className="flex items-center gap-2.5">
+                      {isFolder ? (
+                        item.isExpanded() ? (
+                          <FolderOpenIcon className={`shrink-0 ${isTopLevel ? "w-[18px] h-[18px] text-foreground/70" : "w-4 h-4 text-muted-foreground/70"}`} />
+                        ) : (
+                          <FolderIcon className={`shrink-0 ${isTopLevel ? "w-[18px] h-[18px] text-foreground/70" : "w-4 h-4 text-muted-foreground/70"}`} />
+                        )
                       ) : (
-                        <FolderIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-                      )
-                    ) : (
-                      <FileIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-                    )}
-                    {item.getItemName()}
-                  </TreeItemLabel>
+                        <FileIcon className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                      )}
+                      <span className={`
+                        ${isTopLevel && isFolder ? "text-sm font-medium text-foreground" : ""}
+                        ${!isTopLevel && isFolder ? "text-sm font-medium text-foreground/80" : ""}
+                        ${!isFolder ? "text-[13px] text-foreground/70" : ""}
+                      `}>
+                        {item.getItemName()}
+                      </span>
+                    </TreeItemLabel>
 
-                  {!item.isFolder() && (
-                    <StarRating
-                      rating={item.getItemData().rating ?? 0}
-                      onChange={() => {}}
-                      size={14}
-                    />
-                  )}
-                </div>
-              </TreeItem>
-            ))}
+                    {!isFolder && (
+                      <StarRating
+                        rating={item.getItemData().rating ?? 0}
+                        onChange={() => {}}
+                        size={13}
+                      />
+                    )}
+                  </div>
+                </TreeItem>
+              );
+            })}
           </Tree>
         </div>
       </main>
