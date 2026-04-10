@@ -17,7 +17,10 @@ interface Item {
 }
 
 const existingItems: Record<string, Item> = {
-  root: { name: "My Courses", children: ["cs101", "math201", "phys150", "bio110"] },
+  root: {
+    name: "My Courses",
+    children: ["cs101", "math201", "phys150", "bio110", "comp3230"],
+  },
   cs101: { name: "CS 101 – Intro to Computer Science", children: ["cs101-lectures", "cs101-labs"] },
   "cs101-lectures": { name: "Lectures", children: ["cs101-lec1", "cs101-lec2", "cs101-lec3"] },
   "cs101-lec1": { name: "Lecture 1 - Variables.pdf", rating: 4 },
@@ -43,6 +46,23 @@ const existingItems: Record<string, Item> = {
   "bio-lec2": { name: "Lecture 2 - Mitosis.pdf", rating: 0, isNew: true },
   "bio-labs": { name: "Labs", children: ["bio-lab1"], isNew: true },
   "bio-lab1": { name: "Lab 1 - Microscopy.pdf", rating: 0, isNew: true },
+  comp3230: {
+    name: "COMP3230 – Operating Systems (HKU)",
+    children: ["comp3230-lectures", "comp3230-assignments"],
+  },
+  "comp3230-lectures": {
+    name: "Lectures",
+    children: ["comp3230-lec1", "comp3230-lec2", "comp3230-lec3"],
+  },
+  "comp3230-lec1": { name: "Lecture 1 - Processes and threads.pdf", rating: 4 },
+  "comp3230-lec2": { name: "Lecture 2 - CPU scheduling.pdf", rating: 3 },
+  "comp3230-lec3": { name: "Lecture 3 - Memory management.pdf", rating: 2 },
+  "comp3230-assignments": {
+    name: "Assignments",
+    children: ["comp3230-a1", "comp3230-a2"],
+  },
+  "comp3230-a1": { name: "Assignment 1 - Shell basics.pdf", rating: 5 },
+  "comp3230-a2": { name: "Assignment 2 - Pthreads.pdf", rating: 0 },
 };
 
 function itemMatchesSearch(itemId: string, query: string): boolean {
