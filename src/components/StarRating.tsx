@@ -11,13 +11,18 @@ interface StarRatingProps {
 export default function StarRating({ rating, onChange, size = 16 }: StarRatingProps) {
   const [hover, setHover] = useState(0);
 
+  const handleClick = (star: number) => {
+    // Deselect if clicking the same rating
+    onChange?.(star === rating ? 0 : star);
+  };
+
   return (
     <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
-          onClick={() => onChange?.(star)}
+          onClick={() => handleClick(star)}
           onMouseEnter={() => setHover(star)}
           onMouseLeave={() => setHover(0)}
           className="p-0 bg-transparent border-none cursor-pointer"
@@ -27,7 +32,7 @@ export default function StarRating({ rating, onChange, size = 16 }: StarRatingPr
             className={cn(
               "transition-colors",
               (hover || rating) >= star
-                ? "fill-yellow-400 text-yellow-400"
+                ? "fill-foreground text-foreground"
                 : "text-muted-foreground/30"
             )}
           />
