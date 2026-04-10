@@ -1,17 +1,23 @@
-import { useState } from "react";
+import { useState, SVGProps } from "react";
 import { useNavigate } from "react-router-dom";
+import { CursorMark } from "@/components/CursorMark";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
-import Logo from "@/components/Logo";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from "lucide-react";
+
+const GoogleIcon = (props: SVGProps<SVGSVGElement>) => (
+  <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+    <path d="M3.06364 7.50914C4.70909 4.24092 8.09084 2 12 2C14.6954 2 16.959 2.99095 18.6909 4.60455L15.8227 7.47274C14.7864 6.48185 13.4681 5.97727 12 5.97727C9.39542 5.97727 7.19084 7.73637 6.40455 10.1C6.2045 10.7 6.09086 11.3409 6.09086 12C6.09086 12.6591 6.2045 13.3 6.40455 13.9C7.19084 16.2636 9.39542 18.0227 12 18.0227C13.3454 18.0227 14.4909 17.6682 15.3864 17.0682C16.4454 16.3591 17.15 15.3 17.3818 14.05H12V10.1818H21.4181C21.5364 10.8363 21.6 11.5182 21.6 12.2273C21.6 15.2727 20.5091 17.8363 18.6181 19.5773C16.9636 21.1046 14.7 22 12 22C8.09084 22 4.70909 19.7591 3.06364 16.4909C2.38638 15.1409 2 13.6136 2 12C2 10.3864 2.38638 8.85911 3.06364 7.50914Z" />
+  </svg>
+);
 
 const Login = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,128 +25,171 @@ const Login = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8">
-        {/* Logo */}
-        <div className="flex flex-col items-center space-y-4">
-          <Logo className="w-14 h-14 text-foreground" />
-          <h1 className="text-3xl font-semibold text-foreground">
-            {isSignUp ? "Create account" : "Welcome back"}
-          </h1>
-          <p className="text-muted-foreground font-light tracking-wide">
-            "Bridge gaps from what you already know."
-          </p>
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
+      <div className="mx-auto w-full max-w-xs space-y-6">
+        <div className="space-y-5 text-center">
+          <CursorMark className="mx-auto h-16 w-16 text-foreground" />
+          <div className="space-y-3">
+            <h1 className="text-balance text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-[1.6875rem]">
+              {isSignUp ? "Create an account" : "Welcome back"}
+            </h1>
+            <blockquote className="mx-auto max-w-[min(100%,22rem)] border-none p-0">
+              <p className="text-pretty text-center font-mono text-[0.8125rem] leading-[1.65] tracking-[-0.01em] text-muted-foreground sm:text-[0.84375rem]">
+                <span className="text-muted-foreground/40" aria-hidden>
+                  "
+                </span>
+                {isSignUp
+                  ? "Upload materials. Tag what you know—and what you missed."
+                  : "Bridge gaps from what you already know."}
+                <span className="text-muted-foreground/40" aria-hidden>
+                  "
+                </span>
+              </p>
+            </blockquote>
+          </div>
         </div>
 
-        {/* Google Sign In */}
-        <Button
-          variant="outline"
-          className="w-full h-14 text-base font-medium gap-3 border-border hover:bg-secondary"
-          onClick={() => navigate("/dashboard")}
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24">
-            <path
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
-              fill="#4285F4"
-            />
-            <path
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              fill="#34A853"
-            />
-            <path
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              fill="#FBBC05"
-            />
-            <path
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              fill="#EA4335"
-            />
-          </svg>
-          Sign in with Google
-        </Button>
-
-        {/* Divider */}
-        <div className="flex items-center gap-4">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-sm text-muted-foreground">or sign in with email</span>
-          <div className="flex-1 h-px bg-border" />
-        </div>
-
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                type="email"
-                placeholder="you@university.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-11 h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full justify-center gap-2 text-foreground"
+            type="button"
+            onClick={() => navigate("/dashboard")}
+          >
+            <GoogleIcon className="h-4 w-4" />
+            {isSignUp ? "Continue with Google" : "Sign in with Google"}
+          </Button>
+
+          <div className="flex items-center gap-2">
+            <Separator className="flex-1" />
+            <span className="text-sm text-muted-foreground">
+              {isSignUp ? "or sign up with email" : "or sign in with email"}
+            </span>
+            <Separator className="flex-1" />
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-foreground">Password</label>
-              {!isSignUp && (
+          <div className="space-y-6">
+            {isSignUp && (
+              <div>
+                <Label htmlFor="username" className="text-foreground">
+                  Username
+                </Label>
+                <div className="mt-2.5">
+                  <Input
+                    id="username"
+                    autoComplete="username"
+                    placeholder="Choose a username"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="email" className="text-foreground">
+                Email
+              </Label>
+              <div className="relative mt-2.5">
+                <Input
+                  id="email"
+                  className="peer ps-9"
+                  type="email"
+                  placeholder="meghamsh@connect.hku.hk"
+                  autoComplete="email"
+                />
+                <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-foreground/80 peer-disabled:opacity-50">
+                  <Mail size={16} aria-hidden="true" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-foreground">
+                  Password
+                </Label>
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    className="text-sm text-foreground hover:underline"
+                  >
+                    Forgot Password?
+                  </button>
+                )}
+              </div>
+              <div className="relative mt-2.5">
+                <Input
+                  id="password"
+                  className="peer ps-9 pe-9"
+                  placeholder="Enter your password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={isSignUp ? "new-password" : "current-password"}
+                />
+                <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 text-foreground/80 peer-disabled:opacity-50">
+                  <Lock size={16} aria-hidden="true" />
+                </div>
                 <button
+                  className="absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md text-foreground/80 outline-none transition-[color,box-shadow] hover:text-foreground focus:z-10 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
                   type="button"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  aria-controls="password"
                 >
-                  Forgot Password?
+                  {showPassword ? (
+                    <EyeOff size={16} aria-hidden="true" />
+                  ) : (
+                    <Eye size={16} aria-hidden="true" />
+                  )}
                 </button>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              {isSignUp ? (
+                <>
+                  <Checkbox id="terms" />
+                  <Label htmlFor="terms" className="text-foreground">
+                    I agree to the{" "}
+                    <span className="underline-offset-4 hover:underline cursor-pointer">
+                      Terms
+                    </span>{" "}
+                    and{" "}
+                    <span className="underline-offset-4 hover:underline cursor-pointer">
+                      Conditions
+                    </span>
+                  </Label>
+                </>
+              ) : (
+                <>
+                  <Checkbox id="remember-me" />
+                  <Label htmlFor="remember-me" className="text-foreground">
+                    Remember for 30 days
+                  </Label>
+                </>
               )}
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-11 pr-11 h-12 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
           </div>
 
-          {!isSignUp && (
-            <div className="flex items-center gap-2">
-              <Checkbox id="remember" className="border-border data-[state=checked]:bg-foreground data-[state=checked]:text-background" />
-              <label htmlFor="remember" className="text-sm text-foreground cursor-pointer">
-                Remember for 30 days
-              </label>
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            className="w-full h-14 text-base font-medium gap-2 bg-secondary text-foreground hover:bg-muted"
-          >
+          <Button size="lg" className="w-full" type="submit">
             {isSignUp ? "Create account" : "Sign in"}
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="h-4 w-4" />
           </Button>
-        </form>
 
-        {/* Toggle */}
-        <p className="text-center text-sm text-muted-foreground">
-          {isSignUp ? "Already have an account?" : "No account?"}{" "}
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="font-semibold text-foreground hover:underline"
-          >
-            {isSignUp ? "Sign in" : "Create an account"}
-          </button>
-        </p>
+          <div className="text-center text-sm text-foreground">
+            {isSignUp ? "Already have an account?" : "No account?"}{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setShowPassword(false);
+              }}
+              className="font-medium text-foreground hover:underline"
+            >
+              {isSignUp ? "Sign in" : "Create an account"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
