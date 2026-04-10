@@ -1,155 +1,75 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { hotkeysCoreFeature, syncDataLoaderFeature } from "@headless-tree/core";
+import { useTree } from "@headless-tree/react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, FolderOpen, FileIcon, FolderIcon, ChevronDown, ChevronRight } from "lucide-react";
+import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
+import { ArrowLeft, FolderOpen, FileIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
 import Logo from "@/components/Logo";
 import StarRating from "@/components/StarRating";
 
-interface FileNode {
-  id: string;
+interface Item {
   name: string;
-  type: "file" | "folder";
-  children?: FileNode[];
-  rating: number;
+  children?: string[];
 }
 
-function buildTreeFromFiles(fileList: FileList): FileNode[] {
-  const root: Record<string, any> = {};
+const mockItems: Record<string, Item> = {
+  root: {
+    name: "Course Materials",
+    children: ["lectures", "assignments", "resources"],
+  },
+  lectures: {
+    name: "Lectures",
+    children: ["lecture-1", "lecture-2", "lecture-3"],
+  },
+  "lecture-1": { name: "Week 1 - Introduction.pdf" },
+  "lecture-2": { name: "Week 2 - Data Structures.pdf" },
+  "lecture-3": { name: "Week 3 - Algorithms.pdf" },
+  assignments: {
+    name: "Assignments",
+    children: ["hw1", "hw2"],
+  },
+  hw1: { name: "Homework 1.docx" },
+  hw2: { name: "Homework 2.docx" },
+  resources: {
+    name: "Resources",
+    children: ["textbook", "notes", "cheatsheet"],
+  },
+  textbook: { name: "Textbook Chapter 1-5.pdf" },
+  notes: { name: "Study Notes.md" },
+  cheatsheet: { name: "Formula Cheatsheet.pdf" },
+};
 
-  Array.from(fileList).forEach((file) => {
-    const parts = (file.webkitRelativePath || file.name).split("/");
-    let current = root;
-    parts.forEach((part, i) => {
-      if (!current[part]) {
-        current[part] = i === parts.length - 1 ? { __file: true } : {};
-      }
-      current = current[part];
-    });
-  });
-
-  let idCounter = 0;
-  const convert = (obj: Record<string, any>): FileNode[] => {
-    return Object.entries(obj).map(([name, value]) => {
-      const id = `node-${idCounter++}`;
-      if (value.__file) {
-        return { id, name, type: "file" as const, rating: 0 };
-      }
-      const { __file, ...rest } = value;
-      return {
-        id,
-        name,
-        type: "folder" as const,
-        children: convert(rest),
-        rating: 0,
-      };
-    });
-  };
-
-  return convert(root);
-}
-
-function TreeNode({
-  node,
-  onRatingChange,
-  depth = 0,
-}: {
-  node: FileNode;
-  onRatingChange: (id: string, rating: number) => void;
-  depth?: number;
-}) {
-  const [expanded, setExpanded] = useState(true);
-  const isFolder = node.type === "folder";
-
-  return (
-    <div>
-      <div
-        className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-secondary/50 transition-colors group"
-        style={{ paddingLeft: `${depth * 20 + 8}px` }}
-      >
-        {isFolder ? (
-          <button
-            onClick={() => setExpanded(!expanded)}
-            className="p-0 bg-transparent border-none cursor-pointer flex items-center"
-          >
-            {expanded ? (
-              <ChevronDown className="w-4 h-4 text-muted-foreground" />
-            ) : (
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            )}
-          </button>
-        ) : (
-          <span className="w-4" />
-        )}
-
-        {isFolder ? (
-          <FolderIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-        ) : (
-          <FileIcon className="w-4 h-4 text-muted-foreground shrink-0" />
-        )}
-
-        <span className="text-sm text-foreground flex-1 truncate">{node.name}</span>
-
-        {!isFolder && (
-          <StarRating
-            rating={node.rating}
-            onChange={(r) => onRatingChange(node.id, r)}
-            size={14}
-          />
-        )}
-      </div>
-
-      {isFolder && expanded && node.children && (
-        <div>
-          {node.children.map((child) => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              onRatingChange={onRatingChange}
-              depth={depth + 1}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function updateRating(nodes: FileNode[], id: string, rating: number): FileNode[] {
-  return nodes.map((node) => {
-    if (node.id === id) return { ...node, rating };
-    if (node.children) return { ...node, children: updateRating(node.children, id, rating) };
-    return node;
-  });
-}
+const indent = 20;
 
 const NewFolder = () => {
   const navigate = useNavigate();
-  const [tree, setTree] = useState<FileNode[]>([]);
+  const [hasSelected, setHasSelected] = useState(false);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
   const folderInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFolderSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newNodes = buildTreeFromFiles(e.target.files);
-      setTree((prev) => [...prev, ...newNodes]);
-    }
-  };
+  const tree = useTree<Item>({
+    initialState: {
+      expandedItems: ["lectures", "assignments", "resources"],
+    },
+    indent,
+    rootItemId: "root",
+    getItemName: (item) => item.getItemData().name,
+    isItemFolder: (item) => (item.getItemData()?.children?.length ?? 0) > 0,
+    dataLoader: {
+      getItem: (itemId) => mockItems[itemId],
+      getChildren: (itemId) => mockItems[itemId].children ?? [],
+    },
+    features: [syncDataLoaderFeature, hotkeysCoreFeature],
+  });
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      let idCounter = Date.now();
-      const newFiles: FileNode[] = Array.from(e.target.files).map((file) => ({
-        id: `file-${idCounter++}`,
-        name: file.name,
-        type: "file" as const,
-        rating: 0,
-      }));
-      setTree((prev) => [...prev, ...newFiles]);
-    }
+  const handleSelect = () => {
+    setHasSelected(true);
   };
 
   const handleRatingChange = (id: string, rating: number) => {
-    setTree((prev) => updateRating(prev, id, rating));
+    setRatings((prev) => ({ ...prev, [id]: rating }));
   };
 
   return (
@@ -175,10 +95,13 @@ const NewFolder = () => {
       <main className="flex-1 container mx-auto px-4 py-8 max-w-2xl">
         <h1 className="text-2xl font-semibold text-foreground mb-6">New Folder</h1>
 
-        {tree.length === 0 ? (
+        {!hasSelected ? (
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <button
-              onClick={() => folderInputRef.current?.click()}
+              onClick={() => {
+                folderInputRef.current?.click();
+                handleSelect();
+              }}
               className="glass-card rounded-2xl p-10 flex flex-col items-center gap-4 hover:bg-secondary/60 transition-all group w-64 h-56 justify-center"
             >
               <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -189,7 +112,10 @@ const NewFolder = () => {
             </button>
 
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => {
+                fileInputRef.current?.click();
+                handleSelect();
+              }}
               className="glass-card rounded-2xl p-10 flex flex-col items-center gap-4 hover:bg-secondary/60 transition-all group w-64 h-56 justify-center"
             >
               <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -201,20 +127,41 @@ const NewFolder = () => {
           </div>
         ) : (
           <div className="glass-card rounded-2xl p-4">
-            {tree.map((node) => (
-              <TreeNode
-                key={node.id}
-                node={node}
-                onRatingChange={handleRatingChange}
-              />
-            ))}
+            <Tree tree={tree} className="w-full">
+              {tree.getItems().map((item) => (
+                <TreeItem key={item.getId()} item={item}>
+                  <div className="flex items-center justify-between w-full">
+                    <TreeItemLabel item={item} className="flex items-center gap-2">
+                      {item.isFolder() ? (
+                        item.isExpanded() ? (
+                          <FolderOpenIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                        ) : (
+                          <FolderIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                        )
+                      ) : (
+                        <FileIcon className="w-4 h-4 text-muted-foreground shrink-0" />
+                      )}
+                      {item.getItemName()}
+                    </TreeItemLabel>
+
+                    {!item.isFolder() && (
+                      <StarRating
+                        rating={ratings[item.getId()] ?? 0}
+                        onChange={(r) => handleRatingChange(item.getId(), r)}
+                        size={14}
+                      />
+                    )}
+                  </div>
+                </TreeItem>
+              ))}
+            </Tree>
 
             <div className="mt-4 pt-4 border-t border-border flex justify-between">
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => folderInputRef.current?.click()}>
+                <Button variant="outline" size="sm" onClick={handleSelect}>
                   Add Folder
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                <Button variant="outline" size="sm" onClick={handleSelect}>
                   Add Files
                 </Button>
               </div>
@@ -230,14 +177,14 @@ const NewFolder = () => {
           type="file"
           className="hidden"
           {...({ webkitdirectory: "", directory: "", multiple: true } as any)}
-          onChange={handleFolderSelect}
+          onChange={() => {}}
         />
         <input
           ref={fileInputRef}
           type="file"
           className="hidden"
           multiple
-          onChange={handleFileSelect}
+          onChange={() => {}}
         />
       </main>
     </div>
