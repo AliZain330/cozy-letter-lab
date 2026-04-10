@@ -4,7 +4,7 @@ import { useTree } from "@headless-tree/react";
 import { Button } from "@/components/ui/button";
 import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
 import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon, BookOpen } from "lucide-react";
-import Logo from "@/components/Logo";
+import { CursorMark } from "@/components/CursorMark";
 import StarRating from "@/components/StarRating";
 
 interface Item {
@@ -14,50 +14,23 @@ interface Item {
 }
 
 const existingItems: Record<string, Item> = {
-  root: {
-    name: "My Courses",
-    children: ["cs101", "math201", "phys150"],
-  },
-  cs101: {
-    name: "CS 101 – Intro to Computer Science",
-    children: ["cs101-lectures", "cs101-labs"],
-  },
-  "cs101-lectures": {
-    name: "Lectures",
-    children: ["cs101-lec1", "cs101-lec2", "cs101-lec3"],
-  },
+  root: { name: "My Courses", children: ["cs101", "math201", "phys150"] },
+  cs101: { name: "CS 101 – Intro to Computer Science", children: ["cs101-lectures", "cs101-labs"] },
+  "cs101-lectures": { name: "Lectures", children: ["cs101-lec1", "cs101-lec2", "cs101-lec3"] },
   "cs101-lec1": { name: "Lecture 1 - Variables.pdf", rating: 4 },
   "cs101-lec2": { name: "Lecture 2 - Control Flow.pdf", rating: 2 },
   "cs101-lec3": { name: "Lecture 3 - Functions.pdf", rating: 5 },
-  "cs101-labs": {
-    name: "Labs",
-    children: ["cs101-lab1", "cs101-lab2"],
-  },
+  "cs101-labs": { name: "Labs", children: ["cs101-lab1", "cs101-lab2"] },
   "cs101-lab1": { name: "Lab 1 - Hello World.py", rating: 5 },
   "cs101-lab2": { name: "Lab 2 - Loops.py", rating: 3 },
-  math201: {
-    name: "MATH 201 – Linear Algebra",
-    children: ["math-notes", "math-hw"],
-  },
-  "math-notes": {
-    name: "Notes",
-    children: ["math-n1", "math-n2"],
-  },
+  math201: { name: "MATH 201 – Linear Algebra", children: ["math-notes", "math-hw"] },
+  "math-notes": { name: "Notes", children: ["math-n1", "math-n2"] },
   "math-n1": { name: "Chapter 1 - Vectors.pdf", rating: 3 },
   "math-n2": { name: "Chapter 2 - Matrices.pdf", rating: 1 },
-  "math-hw": {
-    name: "Homework",
-    children: ["math-hw1"],
-  },
+  "math-hw": { name: "Homework", children: ["math-hw1"] },
   "math-hw1": { name: "Problem Set 1.pdf", rating: 4 },
-  phys150: {
-    name: "PHYS 150 – Mechanics",
-    children: ["phys-slides", "phys-exam"],
-  },
-  "phys-slides": {
-    name: "Slides",
-    children: ["phys-s1", "phys-s2"],
-  },
+  phys150: { name: "PHYS 150 – Mechanics", children: ["phys-slides", "phys-exam"] },
+  "phys-slides": { name: "Slides", children: ["phys-s1", "phys-s2"] },
   "phys-s1": { name: "Kinematics.pptx", rating: 2 },
   "phys-s2": { name: "Newton's Laws.pptx", rating: 5 },
   "phys-exam": { name: "Midterm Review.pdf", rating: 3 },
@@ -85,12 +58,11 @@ const ExistingFolder = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-sm bg-background/80 sticky top-0 z-10">
         <div className="container mx-auto flex items-center justify-between h-14 px-6">
-          <div className="flex items-center gap-3">
-            <Logo className="w-7 h-7 text-foreground" />
-            <span className="text-base font-semibold text-foreground tracking-tight">BridgeAI</span>
+          <div className="flex items-center gap-2.5">
+            <CursorMark className="w-6 h-6 text-foreground" />
+            <span className="text-base font-semibold tracking-[-0.03em] text-foreground">debil</span>
           </div>
           <Button
             variant="ghost"
@@ -104,15 +76,14 @@ const ExistingFolder = () => {
         </div>
       </header>
 
-      {/* Main */}
       <main className="flex-1 container mx-auto px-6 py-10 max-w-3xl">
         <div className="flex items-center gap-3 mb-8">
           <div className="p-2 rounded-lg bg-accent/50">
             <BookOpen className="w-5 h-5 text-muted-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold text-foreground tracking-tight">My Courses</h1>
-            <p className="text-sm text-muted-foreground">Browse your existing course materials and ratings</p>
+            <h1 className="text-xl font-semibold tracking-[-0.03em] text-foreground">My Courses</h1>
+            <p className="text-sm text-muted-foreground font-mono tracking-[-0.01em]">Browse your existing course materials and ratings</p>
           </div>
         </div>
 
@@ -146,6 +117,7 @@ const ExistingFolder = () => {
                         <FileIcon className="w-4 h-4 text-muted-foreground/50 shrink-0" />
                       )}
                       <span className={`
+                        tracking-[-0.01em]
                         ${isTopLevel && isFolder ? "text-sm font-medium text-foreground" : ""}
                         ${!isTopLevel && isFolder ? "text-sm font-medium text-foreground/80" : ""}
                         ${!isFolder ? "text-[13px] text-foreground/70" : ""}
