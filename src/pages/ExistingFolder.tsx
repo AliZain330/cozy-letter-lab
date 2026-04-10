@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { hotkeysCoreFeature, syncDataLoaderFeature } from "@headless-tree/core";
+import { useTree } from "@headless-tree/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
 import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon, BookOpen, Search, ChevronRight } from "lucide-react";
 import { CursorMark } from "@/components/CursorMark";
 import StarRating from "@/components/StarRating";
@@ -35,6 +38,16 @@ const existingItems: Record<string, Item> = {
   "phys-exam": { name: "Midterm Review.pdf", rating: 3 },
 };
 
+function itemMatchesSearch(itemId: string, query: string): boolean {
+  const item = existingItems[itemId];
+  if (!item) return false;
+  if (item.name.toLowerCase().includes(query)) return true;
+  if (item.children) {
+    return item.children.some((childId) => itemMatchesSearch(childId, query));
+  }
+  return false;
+}
+
 function countFiles(itemId: string): number {
   const item = existingItems[itemId];
   if (!item) return 0;
@@ -42,96 +55,19 @@ function countFiles(itemId: string): number {
   return item.children.reduce((sum, id) => sum + countFiles(id), 0);
 }
 
-function itemMatchesSearch(itemId: string, query: string): boolean {
-  const item = existingItems[itemId];
-  if (!item) return false;
-  if (item.name.toLowerCase().includes(query)) return true;
-  if (item.children) return item.children.some((c) => itemMatchesSearch(c, query));
-  return false;
-}
-
-function FileTree({ itemId, depth = 0, query }: { itemId: string; depth?: number; query: string }) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const item = existingItems[itemId];
-  if (!item) return null;
-
-  const isFolder = !!item.children?.length;
-  const isOpen = expanded.has(itemId);
-
-  const toggle = () => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(itemId)) next.delete(itemId);
-      else next.add(itemId);
-      return next;
-    });
-  };
-
-  if (query && !itemMatchesSearch(itemId, query)) return null;
-
-  return (
-    <div>
-      <button
-        onClick={isFolder ? toggle : undefined}
-        className={`
-          w-full flex items-center justify-between gap-4 px-3 py-2 text-left
-          transition-all duration-150 rounded-lg
-          hover:bg-accent/30 hover:translate-x-1
-        `}
-        style={{ paddingLeft: `${depth * 20 + 12}px` }}
-      >
-        <div className="flex items-center gap-2.5 min-w-0">
-          {isFolder ? (
-            <>
-              <ChevronRight className={`w-3.5 h-3.5 text-muted-foreground/50 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`} />
-              {isOpen ? (
-                <FolderOpenIcon className="w-4 h-4 text-foreground/70 shrink-0" />
-              ) : (
-                <FolderIcon className="w-4 h-4 text-muted-foreground/70 shrink-0" />
-              )}
-            </>
-          ) : (
-            <>
-              <span className="w-3.5 shrink-0" />
-              <FileIcon className="w-4 h-4 text-muted-foreground/50 shrink-0" />
-            </>
-          )}
-          <span className={`tracking-[-0.01em] truncate ${isFolder ? "text-sm font-medium text-foreground/80" : "text-[13px] text-foreground/70"}`}>
-            {item.name}
-          </span>
-        </div>
-        {!isFolder && (
-          <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-            <StarRating rating={item.rating ?? 0} onChange={() => {}} size={13} />
-          </div>
-        )}
-      </button>
-      {isFolder && isOpen && item.children?.map((childId) => (
-        <FileTree key={childId} itemId={childId} depth={depth + 1} query={query} />
-      ))}
-    </div>
-  );
-}
+const indent = 24;
 
 const ExistingFolder = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
 
   const query = search.toLowerCase().trim();
   const topLevelCourses = existingItems.root.children ?? [];
+
   const filteredCourses = query
     ? topLevelCourses.filter((id) => itemMatchesSearch(id, query))
     : topLevelCourses;
-
-  const toggleCourse = (id: string) => {
-    setExpandedCourses((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -154,16 +90,19 @@ const ExistingFolder = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-6 py-10 max-w-5xl">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 rounded-lg bg-accent/50">
-            <BookOpen className="w-5 h-5 text-muted-foreground" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold tracking-[-0.03em] text-foreground">My Courses</h1>
-            <p className="text-sm text-muted-foreground font-mono tracking-[-0.01em]">Browse your existing course materials and ratings</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-accent/50">
+              <BookOpen className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold tracking-[-0.03em] text-foreground">My Courses</h1>
+              <p className="text-sm text-muted-foreground font-mono tracking-[-0.01em]">Browse your existing course materials and ratings</p>
+            </div>
           </div>
         </div>
 
+        {/* Search */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
           <Input
@@ -174,56 +113,53 @@ const ExistingFolder = () => {
           />
         </div>
 
-        {/* Course cards with inline file trees */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Course cards - horizontal grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {filteredCourses.map((courseId) => {
             const course = existingItems[courseId];
-            const isExpanded = expandedCourses.has(courseId);
+            const isExpanded = expandedCourse === courseId;
             const fileCount = countFiles(courseId);
 
             return (
-              <div key={courseId} className="flex flex-col">
-                {/* Course card */}
-                <button
-                  onClick={() => toggleCourse(courseId)}
-                  className={`
-                    group text-left rounded-xl border transition-all duration-200
-                    p-5 flex flex-col gap-3
-                    hover:scale-[1.03] hover:shadow-lg hover:shadow-foreground/5
-                    ${isExpanded
-                      ? "border-foreground/20 bg-accent/20"
-                      : "border-border/50 bg-card/40 hover:border-foreground/15 hover:bg-accent/10"
-                    }
-                  `}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="p-2 rounded-lg bg-accent/50 group-hover:bg-accent/80 transition-colors">
-                      {isExpanded ? (
-                        <FolderOpenIcon className="w-5 h-5 text-foreground/70" />
-                      ) : (
-                        <FolderIcon className="w-5 h-5 text-muted-foreground group-hover:text-foreground/70 transition-colors" />
-                      )}
-                    </div>
-                    <ChevronRight className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-200 ${isExpanded ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
+              <button
+                key={courseId}
+                onClick={() => setExpandedCourse(isExpanded ? null : courseId)}
+                className={`
+                  group text-left rounded-xl border transition-all duration-200
+                  p-5 flex flex-col gap-3
+                  hover:scale-[1.03] hover:shadow-lg hover:shadow-foreground/5
+                  ${isExpanded
+                    ? "border-foreground/20 bg-accent/20 scale-[1.01]"
+                    : "border-border/50 bg-card/40 hover:border-foreground/15 hover:bg-accent/10"
+                  }
+                `}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="p-2 rounded-lg bg-accent/50 group-hover:bg-accent/80 transition-colors">
+                    {isExpanded ? (
+                      <FolderOpenIcon className="w-5 h-5 text-foreground/70" />
+                    ) : (
+                      <FolderIcon className="w-5 h-5 text-muted-foreground group-hover:text-foreground/70 transition-colors" />
+                    )}
                   </div>
-                  <div>
-                    <span className="text-sm font-medium tracking-[-0.01em] text-foreground">{course.name}</span>
-                    <p className="text-xs text-muted-foreground mt-1 font-mono">{fileCount} files</p>
-                  </div>
-                </button>
-
-                {/* File tree directly below the card */}
-                {isExpanded && (
-                  <div className="mt-2 rounded-xl border border-border/40 bg-card/30 py-1 animate-fade-in overflow-hidden">
-                    {course.children?.map((childId) => (
-                      <FileTree key={childId} itemId={childId} depth={0} query={query} />
-                    ))}
-                  </div>
-                )}
-              </div>
+                  <ChevronRight className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-200 ${isExpanded ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
+                </div>
+                <div>
+                  <span className="text-sm font-medium tracking-[-0.01em] text-foreground">{course.name}</span>
+                  <p className="text-xs text-muted-foreground mt-1 font-mono">{fileCount} files</p>
+                </div>
+              </button>
             );
           })}
         </div>
+
+        {/* Expanded course tree */}
+        {expandedCourse && (
+          <ExpandedCourseTree
+            courseId={expandedCourse}
+            query={query}
+          />
+        )}
 
         {query && filteredCourses.length === 0 && (
           <div className="py-12 text-center text-sm text-muted-foreground font-mono">
@@ -234,5 +170,79 @@ const ExistingFolder = () => {
     </div>
   );
 };
+
+function ExpandedCourseTree({ courseId, query }: { courseId: string; query: string }) {
+  const tree = useTree<Item>({
+    initialState: {
+      expandedItems: existingItems[courseId]?.children ?? [],
+    },
+    indent,
+    rootItemId: courseId,
+    getItemName: (item) => item.getItemData().name,
+    isItemFolder: (item) => (item.getItemData()?.children?.length ?? 0) > 0,
+    dataLoader: {
+      getItem: (itemId) => existingItems[itemId],
+      getChildren: (itemId) => existingItems[itemId]?.children ?? [],
+    },
+    features: [syncDataLoaderFeature, hotkeysCoreFeature],
+  });
+
+  const visibleItems = query
+    ? tree.getItems().filter((item) => itemMatchesSearch(item.getId(), query))
+    : tree.getItems();
+
+  return (
+    <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden animate-fade-in">
+      <Tree tree={tree} className="w-full py-1">
+        {visibleItems.map((item) => {
+          const isFolder = item.isFolder();
+
+          return (
+            <TreeItem
+              key={item.getId()}
+              item={item}
+              className={`
+                group rounded-none border-b border-border/15 last:border-b-0
+                transition-all duration-150
+                hover:bg-accent/30 hover:translate-x-1
+                ${isFolder ? "py-2" : "py-1.5"}
+              `}
+            >
+              <div className="flex items-center justify-between w-full gap-8 pr-3">
+                <TreeItemLabel item={item} className="flex items-center gap-2.5 min-w-0">
+                  {isFolder ? (
+                    item.isExpanded() ? (
+                      <FolderOpenIcon className="w-4 h-4 text-muted-foreground/70 shrink-0" />
+                    ) : (
+                      <FolderIcon className="w-4 h-4 text-muted-foreground/70 shrink-0" />
+                    )
+                  ) : (
+                    <FileIcon className="w-4 h-4 text-muted-foreground/50 shrink-0" />
+                  )}
+                  <span className={`
+                    tracking-[-0.01em] truncate
+                    ${isFolder ? "text-sm font-medium text-foreground/80" : "text-[13px] text-foreground/70"}
+                  `}>
+                    {item.getItemName()}
+                  </span>
+                </TreeItemLabel>
+
+                {!isFolder && (
+                  <div className="shrink-0">
+                    <StarRating
+                      rating={item.getItemData().rating ?? 0}
+                      onChange={() => {}}
+                      size={13}
+                    />
+                  </div>
+                )}
+              </div>
+            </TreeItem>
+          );
+        })}
+      </Tree>
+    </div>
+  );
+}
 
 export default ExistingFolder;

@@ -33,7 +33,7 @@ const CourseDetail = () => {
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
             <Logo className="w-8 h-8 text-foreground" />
-            <span className="text-lg font-semibold text-foreground">BridgeAI</span>
+            <span className="text-lg font-semibold text-foreground">Debil</span>
           </div>
         </div>
       </header>

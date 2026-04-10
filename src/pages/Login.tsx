@@ -31,7 +31,7 @@ const Login = () => {
           <CursorMark className="mx-auto h-16 w-16 text-foreground" />
           <div className="space-y-3">
             <h1 className="text-balance text-2xl font-semibold tracking-[-0.03em] text-foreground sm:text-[1.6875rem]">
-              {isSignUp ? "Create an account" : "Welcome back"}
+              {isSignUp ? "Create an account" : "Welcome to Debil"}
             </h1>
             <blockquote className="mx-auto max-w-[min(100%,22rem)] border-none p-0">
               <p className="text-pretty text-center font-mono text-[0.8125rem] leading-[1.65] tracking-[-0.01em] text-muted-foreground sm:text-[0.84375rem]">
