@@ -7,6 +7,7 @@ import Login from "./pages/Login.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import CourseDetail from "./pages/CourseDetail.tsx";
 import NewFolder from "./pages/NewFolder.tsx";
+import ExistingFolder from "./pages/ExistingFolder.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
