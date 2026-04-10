@@ -5,7 +5,7 @@ import { useTree } from "@headless-tree/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
-import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon, BookOpen, Search, ChevronRight } from "lucide-react";
+import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon, BookOpen, Search, ChevronRight, Star } from "lucide-react";
 import { CursorMark } from "@/components/CursorMark";
 import StarRating from "@/components/StarRating";
 
