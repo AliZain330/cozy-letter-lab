@@ -71,4 +71,20 @@
   .text-gradient {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-foreground to-muted-foreground;
   }
+
+  .animate-glow-slow {
+    animation: glow 2.5s ease-in-out infinite;
+  }
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 8px hsla(0, 0%, 90%, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px hsla(0, 0%, 90%, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 8px hsla(0, 0%, 90%, 0.3);
+  }
 }
