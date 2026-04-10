@@ -135,18 +135,18 @@ const ExistingFolder = () => {
           />
         </div>
 
-        {/* Course cards with inline expanded trees */}
+        {/* Course cards - each with its own expanded tree below */}
         <div className="flex flex-col gap-4 mb-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredCourses.map((courseId) => {
               const course = existingItems[courseId];
-              const isExpanded = expandedCourse === courseId;
+              const isExpanded = expandedCourses.has(courseId);
               const fileCount = countFiles(courseId);
 
               return (
-                <div key={courseId} className="flex flex-col">
+                <div key={courseId} className="flex flex-col col-span-1">
                   <button
-                    onClick={() => setExpandedCourse(isExpanded ? null : courseId)}
+                    onClick={() => toggleCourse(courseId)}
                     className={`
                       group text-left rounded-xl border transition-all duration-200
                       p-5 flex flex-col gap-3
@@ -172,18 +172,15 @@ const ExistingFolder = () => {
                       <p className="text-xs text-muted-foreground mt-1 font-mono">{fileCount} files</p>
                     </div>
                   </button>
+                  {isExpanded && (
+                    <div className="mt-2">
+                      <ExpandedCourseTree courseId={courseId} query={query} />
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
-
-          {/* Expanded course tree - appears below the grid */}
-          {expandedCourse && (
-            <ExpandedCourseTree
-              courseId={expandedCourse}
-              query={query}
-            />
-          )}
         </div>
 
         {query && filteredCourses.length === 0 && (
