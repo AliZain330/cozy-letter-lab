@@ -7,6 +7,7 @@ import Login from "./pages/Login.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import CourseDetail from "./pages/CourseDetail.tsx";
 import NewFolder from "./pages/NewFolder.tsx";
+import ExistingFolder from "./pages/ExistingFolder.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/new" element={<NewFolder />} />
+          <Route path="/dashboard/existing" element={<ExistingFolder />} />
           <Route path="/course/:id" element={<CourseDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
