@@ -126,11 +126,25 @@ const NewFolder = () => {
   const navigate = useNavigate();
   const [tree, setTree] = useState<FileNode[]>([]);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFolderSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newNodes = buildTreeFromFiles(e.target.files);
       setTree((prev) => [...prev, ...newNodes]);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      let idCounter = Date.now();
+      const newFiles: FileNode[] = Array.from(e.target.files).map((file) => ({
+        id: `file-${idCounter++}`,
+        name: file.name,
+        type: "file" as const,
+        rating: 0,
+      }));
+      setTree((prev) => [...prev, ...newFiles]);
     }
   };
 
@@ -140,7 +154,6 @@ const NewFolder = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-3">
@@ -159,39 +172,32 @@ const NewFolder = () => {
         </div>
       </header>
 
-      {/* Main */}
       <main className="flex-1 container mx-auto px-4 py-8 max-w-2xl">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-foreground">New Folder</h1>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => folderInputRef.current?.click()}
-          >
-            <FolderOpen className="w-4 h-4 mr-2" />
-            Select Folder
-          </Button>
-          <input
-            ref={folderInputRef}
-            type="file"
-            className="hidden"
-            {...({ webkitdirectory: "", directory: "", multiple: true } as any)}
-            onChange={handleFolderSelect}
-          />
-        </div>
+        <h1 className="text-2xl font-semibold text-foreground mb-6">New Folder</h1>
 
         {tree.length === 0 ? (
-          <div className="glass-card rounded-2xl p-12 flex flex-col items-center gap-4 text-center">
-            <FolderOpen className="w-12 h-12 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              Select one or more folders to get started
-            </p>
-            <Button
-              variant="secondary"
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <button
               onClick={() => folderInputRef.current?.click()}
+              className="glass-card rounded-2xl p-10 flex flex-col items-center gap-4 hover:bg-secondary/60 transition-all group w-64 h-56 justify-center"
             >
-              Browse Folders
-            </Button>
+              <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
+                <FolderOpen className="w-7 h-7 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+              <span className="text-lg font-medium text-foreground">Select Folder</span>
+              <span className="text-sm text-muted-foreground">Upload an entire folder</span>
+            </button>
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="glass-card rounded-2xl p-10 flex flex-col items-center gap-4 hover:bg-secondary/60 transition-all group w-64 h-56 justify-center"
+            >
+              <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
+                <FileIcon className="w-7 h-7 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </div>
+              <span className="text-lg font-medium text-foreground">Select Files</span>
+              <span className="text-sm text-muted-foreground">Pick individual files</span>
+            </button>
           </div>
         ) : (
           <div className="glass-card rounded-2xl p-4">
@@ -204,19 +210,35 @@ const NewFolder = () => {
             ))}
 
             <div className="mt-4 pt-4 border-t border-border flex justify-between">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => folderInputRef.current?.click()}
-              >
-                Add More Folders
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => folderInputRef.current?.click()}>
+                  Add Folder
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  Add Files
+                </Button>
+              </div>
               <Button size="sm" onClick={() => navigate("/dashboard")}>
                 Create Course
               </Button>
             </div>
           </div>
         )}
+
+        <input
+          ref={folderInputRef}
+          type="file"
+          className="hidden"
+          {...({ webkitdirectory: "", directory: "", multiple: true } as any)}
+          onChange={handleFolderSelect}
+        />
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          multiple
+          onChange={handleFileSelect}
+        />
       </main>
     </div>
   );
