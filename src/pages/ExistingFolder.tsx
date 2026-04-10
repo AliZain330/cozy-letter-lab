@@ -180,7 +180,10 @@ const ExistingFolder = () => {
                       <ChevronRight className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-200 ${isExpanded ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
                     </div>
                     <div>
-                      <span className="text-sm font-medium tracking-[-0.01em] text-foreground">{course.name}</span>
+                      <span className="text-sm font-medium tracking-[-0.01em] text-foreground">
+                        {course.isNew && <span className="text-amber-400 mr-1.5">★</span>}
+                        {course.name}
+                      </span>
                       <p className="text-xs text-muted-foreground mt-1 font-mono">{fileCount} files</p>
                     </div>
                   </button>
@@ -257,6 +260,7 @@ function ExpandedCourseTree({ courseId, query }: { courseId: string; query: stri
                     tracking-[-0.01em] truncate
                     ${isFolder ? "text-sm font-medium text-foreground/80" : "text-[13px] text-foreground/70"}
                   `}>
+                    {item.getItemData().isNew && <span className="text-amber-400 mr-1">★</span>}
                     {item.getItemName()}
                   </span>
                 </TreeItemLabel>
