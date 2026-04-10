@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { hotkeysCoreFeature, syncDataLoaderFeature } from "@headless-tree/core";
 import { useTree } from "@headless-tree/react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree";
-import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon, BookOpen } from "lucide-react";
+import { ArrowLeft, FileIcon, FolderIcon, FolderOpenIcon, BookOpen, Search } from "lucide-react";
 import { CursorMark } from "@/components/CursorMark";
 import StarRating from "@/components/StarRating";
 
@@ -36,10 +38,24 @@ const existingItems: Record<string, Item> = {
   "phys-exam": { name: "Midterm Review.pdf", rating: 3 },
 };
 
+// Recursively check if an item or any descendant matches the search
+function itemMatchesSearch(itemId: string, query: string): boolean {
+  const item = existingItems[itemId];
+  if (!item) return false;
+  if (item.name.toLowerCase().includes(query)) return true;
+  if (item.children) {
+    return item.children.some((childId) => itemMatchesSearch(childId, query));
+  }
+  return false;
+}
+
 const indent = 24;
 
 const ExistingFolder = () => {
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+
+  const query = search.toLowerCase().trim();
 
   const tree = useTree<Item>({
     initialState: {
@@ -55,6 +71,11 @@ const ExistingFolder = () => {
     },
     features: [syncDataLoaderFeature, hotkeysCoreFeature],
   });
+
+  // Filter visible items based on search
+  const visibleItems = query
+    ? tree.getItems().filter((item) => itemMatchesSearch(item.getId(), query))
+    : tree.getItems();
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -77,19 +98,32 @@ const ExistingFolder = () => {
       </header>
 
       <main className="flex-1 container mx-auto px-6 py-10 max-w-3xl">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="p-2 rounded-lg bg-accent/50">
-            <BookOpen className="w-5 h-5 text-muted-foreground" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-accent/50">
+              <BookOpen className="w-5 h-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h1 className="text-xl font-semibold tracking-[-0.03em] text-foreground">My Courses</h1>
+              <p className="text-sm text-muted-foreground font-mono tracking-[-0.01em]">Browse your existing course materials and ratings</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-xl font-semibold tracking-[-0.03em] text-foreground">My Courses</h1>
-            <p className="text-sm text-muted-foreground font-mono tracking-[-0.01em]">Browse your existing course materials and ratings</p>
-          </div>
+        </div>
+
+        {/* Search / Filter */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search folders and files..."
+            className="pl-9 bg-card/50 border-border/60"
+          />
         </div>
 
         <div className="rounded-xl border border-border/60 bg-card/50 overflow-hidden">
           <Tree tree={tree} className="w-full py-1">
-            {tree.getItems().map((item) => {
+            {visibleItems.map((item) => {
               const level = item.getItemMeta().level;
               const isFolder = item.isFolder();
               const isTopLevel = level === 0;
@@ -105,8 +139,8 @@ const ExistingFolder = () => {
                     ${isFolder ? "py-2" : "py-1.5"}
                   `}
                 >
-                  <div className="flex items-center justify-between w-full pr-2">
-                    <TreeItemLabel item={item} className="flex items-center gap-2.5">
+                  <div className="flex items-center justify-between w-full gap-8 pr-2">
+                    <TreeItemLabel item={item} className="flex items-center gap-2.5 min-w-0">
                       {isFolder ? (
                         item.isExpanded() ? (
                           <FolderOpenIcon className={`shrink-0 ${isTopLevel ? "w-[18px] h-[18px] text-foreground/70" : "w-4 h-4 text-muted-foreground/70"}`} />
@@ -117,7 +151,7 @@ const ExistingFolder = () => {
                         <FileIcon className="w-4 h-4 text-muted-foreground/50 shrink-0" />
                       )}
                       <span className={`
-                        tracking-[-0.01em]
+                        tracking-[-0.01em] truncate
                         ${isTopLevel && isFolder ? "text-sm font-medium text-foreground" : ""}
                         ${!isTopLevel && isFolder ? "text-sm font-medium text-foreground/80" : ""}
                         ${!isFolder ? "text-[13px] text-foreground/70" : ""}
@@ -127,17 +161,25 @@ const ExistingFolder = () => {
                     </TreeItemLabel>
 
                     {!isFolder && (
-                      <StarRating
-                        rating={item.getItemData().rating ?? 0}
-                        onChange={() => {}}
-                        size={13}
-                      />
+                      <div className="shrink-0">
+                        <StarRating
+                          rating={item.getItemData().rating ?? 0}
+                          onChange={() => {}}
+                          size={13}
+                        />
+                      </div>
                     )}
                   </div>
                 </TreeItem>
               );
             })}
           </Tree>
+
+          {query && visibleItems.length === 0 && (
+            <div className="py-8 text-center text-sm text-muted-foreground font-mono">
+              No results for "{search}"
+            </div>
+          )}
         </div>
       </main>
     </div>
