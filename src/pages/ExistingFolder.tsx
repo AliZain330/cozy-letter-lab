@@ -75,7 +75,7 @@ const ExistingFolder = () => {
         <div className="container mx-auto flex items-center justify-between h-14 px-6">
           <div className="flex items-center gap-2.5">
             <CursorMark className="w-6 h-6 text-foreground" />
-            <span className="text-base font-semibold tracking-[-0.03em] text-foreground">debil</span>
+            <span className="text-base font-semibold tracking-[-0.03em] text-foreground">Debil</span>
           </div>
           <Button
             variant="ghost"
