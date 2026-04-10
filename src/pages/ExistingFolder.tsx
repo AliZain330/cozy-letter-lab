@@ -102,6 +102,19 @@ const ExistingFolder = () => {
           </div>
         </div>
 
+        {/* Star rating key */}
+        <div className="flex items-center gap-4 mb-6 text-xs text-muted-foreground font-mono">
+          <span className="flex items-center gap-1.5">
+            <Star size={12} className="text-foreground fill-foreground" />
+            <span>1 = Very less confident</span>
+          </span>
+          <span className="text-border">—</span>
+          <span className="flex items-center gap-1.5">
+            <span className="flex">{[1,2,3,4,5].map(i => <Star key={i} size={12} className="text-foreground fill-foreground" />)}</span>
+            <span>5 = Very confident</span>
+          </span>
+        </div>
+
         {/* Search */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/60" />
@@ -113,53 +126,56 @@ const ExistingFolder = () => {
           />
         </div>
 
-        {/* Course cards - horizontal grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {filteredCourses.map((courseId) => {
-            const course = existingItems[courseId];
-            const isExpanded = expandedCourse === courseId;
-            const fileCount = countFiles(courseId);
+        {/* Course cards with inline expanded trees */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredCourses.map((courseId) => {
+              const course = existingItems[courseId];
+              const isExpanded = expandedCourse === courseId;
+              const fileCount = countFiles(courseId);
 
-            return (
-              <button
-                key={courseId}
-                onClick={() => setExpandedCourse(isExpanded ? null : courseId)}
-                className={`
-                  group text-left rounded-xl border transition-all duration-200
-                  p-5 flex flex-col gap-3
-                  hover:scale-[1.03] hover:shadow-lg hover:shadow-foreground/5
-                  ${isExpanded
-                    ? "border-foreground/20 bg-accent/20 scale-[1.01]"
-                    : "border-border/50 bg-card/40 hover:border-foreground/15 hover:bg-accent/10"
-                  }
-                `}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="p-2 rounded-lg bg-accent/50 group-hover:bg-accent/80 transition-colors">
-                    {isExpanded ? (
-                      <FolderOpenIcon className="w-5 h-5 text-foreground/70" />
-                    ) : (
-                      <FolderIcon className="w-5 h-5 text-muted-foreground group-hover:text-foreground/70 transition-colors" />
-                    )}
-                  </div>
-                  <ChevronRight className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-200 ${isExpanded ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
+              return (
+                <div key={courseId} className="flex flex-col">
+                  <button
+                    onClick={() => setExpandedCourse(isExpanded ? null : courseId)}
+                    className={`
+                      group text-left rounded-xl border transition-all duration-200
+                      p-5 flex flex-col gap-3
+                      hover:scale-[1.03] hover:shadow-lg hover:shadow-foreground/5
+                      ${isExpanded
+                        ? "border-foreground/20 bg-accent/20 scale-[1.01]"
+                        : "border-border/50 bg-card/40 hover:border-foreground/15 hover:bg-accent/10"
+                      }
+                    `}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="p-2 rounded-lg bg-accent/50 group-hover:bg-accent/80 transition-colors">
+                        {isExpanded ? (
+                          <FolderOpenIcon className="w-5 h-5 text-foreground/70" />
+                        ) : (
+                          <FolderIcon className="w-5 h-5 text-muted-foreground group-hover:text-foreground/70 transition-colors" />
+                        )}
+                      </div>
+                      <ChevronRight className={`w-4 h-4 text-muted-foreground/40 transition-transform duration-200 ${isExpanded ? "rotate-90" : "group-hover:translate-x-0.5"}`} />
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium tracking-[-0.01em] text-foreground">{course.name}</span>
+                      <p className="text-xs text-muted-foreground mt-1 font-mono">{fileCount} files</p>
+                    </div>
+                  </button>
                 </div>
-                <div>
-                  <span className="text-sm font-medium tracking-[-0.01em] text-foreground">{course.name}</span>
-                  <p className="text-xs text-muted-foreground mt-1 font-mono">{fileCount} files</p>
-                </div>
-              </button>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          {/* Expanded course tree - appears below the grid */}
+          {expandedCourse && (
+            <ExpandedCourseTree
+              courseId={expandedCourse}
+              query={query}
+            />
+          )}
         </div>
-
-        {/* Expanded course tree */}
-        {expandedCourse && (
-          <ExpandedCourseTree
-            courseId={expandedCourse}
-            query={query}
-          />
-        )}
 
         {query && filteredCourses.length === 0 && (
           <div className="py-12 text-center text-sm text-muted-foreground font-mono">
