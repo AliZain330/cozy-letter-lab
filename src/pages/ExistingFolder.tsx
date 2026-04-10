@@ -60,7 +60,16 @@ const indent = 24;
 const ExistingFolder = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [expandedCourse, setExpandedCourse] = useState<string | null>(null);
+  const [expandedCourses, setExpandedCourses] = useState<Set<string>>(new Set());
+
+  const toggleCourse = (courseId: string) => {
+    setExpandedCourses((prev) => {
+      const next = new Set(prev);
+      if (next.has(courseId)) next.delete(courseId);
+      else next.add(courseId);
+      return next;
+    });
+  };
 
   const query = search.toLowerCase().trim();
   const topLevelCourses = existingItems.root.children ?? [];
