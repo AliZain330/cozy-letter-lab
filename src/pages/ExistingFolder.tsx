@@ -13,10 +13,11 @@ interface Item {
   name: string;
   children?: string[];
   rating?: number;
+  isNew?: boolean;
 }
 
 const existingItems: Record<string, Item> = {
-  root: { name: "My Courses", children: ["cs101", "math201", "phys150"] },
+  root: { name: "My Courses", children: ["cs101", "math201", "phys150", "bio110"] },
   cs101: { name: "CS 101 – Intro to Computer Science", children: ["cs101-lectures", "cs101-labs"] },
   "cs101-lectures": { name: "Lectures", children: ["cs101-lec1", "cs101-lec2", "cs101-lec3"] },
   "cs101-lec1": { name: "Lecture 1 - Variables.pdf", rating: 4 },
@@ -36,6 +37,12 @@ const existingItems: Record<string, Item> = {
   "phys-s1": { name: "Kinematics.pptx", rating: 2 },
   "phys-s2": { name: "Newton's Laws.pptx", rating: 5 },
   "phys-exam": { name: "Midterm Review.pdf", rating: 3 },
+  bio110: { name: "BIO 110 – Cell Biology", children: ["bio-lectures", "bio-labs"], isNew: true },
+  "bio-lectures": { name: "Lectures", children: ["bio-lec1", "bio-lec2"], isNew: true },
+  "bio-lec1": { name: "Lecture 1 - Cell Structure.pdf", rating: 0, isNew: true },
+  "bio-lec2": { name: "Lecture 2 - Mitosis.pdf", rating: 0, isNew: true },
+  "bio-labs": { name: "Labs", children: ["bio-lab1"], isNew: true },
+  "bio-lab1": { name: "Lab 1 - Microscopy.pdf", rating: 0, isNew: true },
 };
 
 function itemMatchesSearch(itemId: string, query: string): boolean {
@@ -111,8 +118,13 @@ const ExistingFolder = () => {
           </div>
         </div>
 
-        {/* Star rating key */}
-        <div className="flex items-center gap-4 mb-6 text-xs text-muted-foreground font-mono">
+        {/* Key / Legend */}
+        <div className="flex flex-wrap items-center gap-4 mb-6 text-xs text-muted-foreground font-mono">
+          <span className="flex items-center gap-1.5">
+            <span className="text-yellow-400">★</span>
+            <span>= New folder / file</span>
+          </span>
+          <span className="text-border">|</span>
           <span className="flex items-center gap-1.5">
             <Star size={12} className="text-foreground fill-foreground" />
             <span>1 = Very less confident</span>
